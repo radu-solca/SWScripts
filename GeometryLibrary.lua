@@ -101,20 +101,27 @@ end
 
 function XTCircle(origin, radius)
 	local circle = {}
-    circle.origin = origin or XTPoint(0,0)
-    circle.radius = radius or 0
-    
-    local innerSector = XTSector(origin, radius, 0, 360)
-    
-    function circle:drawOutline(color)
-    	innerSector:drawOutline(color)
-    end
-    
-    function circle:drawFilled(color)
-    	innerSector:drawFilled(color)
-    end
+	circle.origin = origin or XTPoint(0,0)
+	circle.radius = radius or 0
 
-    return circle
+	local innerSector = XTSector(origin, radius, 0, 360)
+
+	function XTCircle:pointAtAngle(angleInDegrees)
+		local angleInRadians = angleInDegrees * math.pi / 180
+		local x = self.origin.x + self.radius * math.cos(angleInRadians)
+		local y = self.origin.y + self.radius * math.sin(angleInRadians)
+		return XTPoint(x, y)
+	end
+
+	function circle:drawOutline(color)
+		innerSector:drawOutline(color)
+	end
+
+	function circle:drawFilled(color)
+		innerSector:drawFilled(color)
+	end
+
+	return circle
 end
 
 function XTSector(origin, radius, startAngle, endAngle)
