@@ -1,5 +1,3 @@
--- warning: mapping not found --
-
 function onTick()
 	local a = property.getNumber("rps channel")
 	RPM = math.floor(input.getNumber(a) * 60)
@@ -12,26 +10,52 @@ function onDraw()
 	colorPrimary = XTColor(150,150,255)
 	colorSecondary = XTColor(50,50,80)
 	colorHighlight = XTColor(255,0,0)
+	colorGood = XTColor(0,80,0)
+	colorBad = XTColor(80,0,0)
 	screenScale = math.min(screen.getWidth(),screen.getHeight())
 	drawRightSide()
 end
 function drawRightSide()
 	local c = XTPoint(screen.getWidth() / 3 * 2,0)
-	local d = c:addX(2):addY(screenScale - 8)
+	local d = c:addX(2):addY(screenScale - 9)
 	
 	local boxWidth = screenScale - 5
 	local boxHeight = screenScale / 4 - 2
 	
-	XTRectangle(d,boxWidth, boxHeight):drawFilled(colorBackgroundDark):drawOutline(colorPrimary)
+	local tempRectangle = XTRectangle(d,boxWidth, boxHeight)
+	
+	tempRectangle:drawGradient(colorGood, colorBad)
+	
+	local tempMaskWidth = boxWidth * XTClamp(XTMap(tempInCelsius, 20, 115, 1, 0), 0, 1)
+	local tempMaskOffset = boxWidth - tempMaskWidth
+	
+	XTRectangle(d:addX(tempMaskOffset),tempMaskWidth, boxHeight):drawFilled(colorBackgroundDark)
+	
 	XTRectangle(d:addY(1),boxWidth, boxHeight):drawTextBox(tempInCelsius .. "C",colorPrimary)
 	local e = d:addY(- 7)
 	XTRectangle(e:addY(1),boxWidth, boxHeight):drawTextBox("Tmp",colorPrimary)
 	local f = e:addY(- 7)
-	XTRectangle(f,boxWidth, boxHeight):drawFilled(colorBackgroundDark):drawOutline(colorPrimary)
+	
+	tempRectangle:drawOutline(colorPrimary)
+	
+	local rpmRectangle = XTRectangle(f,boxWidth, boxHeight)
+	
+	rpmRectangle:drawGradient(colorGood, colorBad)
+	
+	local rpmMaskWidth = boxWidth * XTClamp(XTMap(RPM, 0, 1500, 1, 0), 0, 1)
+	local rpmMaskOffset = boxWidth - rpmMaskWidth
+	XTRectangle(f:addX(rpmMaskOffset),rpmMaskWidth, boxHeight):drawFilled(colorBackgroundDark)
+	
+	rpmRectangle:drawOutline(colorPrimary)
+	
 	XTRectangle(f:addY(1),boxWidth, boxHeight):drawTextBox(RPM,colorPrimary)
 	local g = f:addY(- 7)
 	XTRectangle(g:addY(1),boxWidth, boxHeight):drawTextBox("RPM",colorPrimary)
 end
+
+
+
+
 function XTMap(h,i,j,k,l)
 	return k + (h - i) * (l - k) / (j - i)
 end
