@@ -1,159 +1,121 @@
--- Tick function that will be executed every logic tick
+-- warning: mapping not found --
+
 function onTick()
-	speedInKmH = math.floor(input.getNumber(6) * 3.6 + 0.5)
-	batteryPercent = math.floor(input.getNumber(7) * 100 +0.5)
-	gear = input.getNumber(8)
-	RPM = math.floor(input.getNumber(9) * 60)
-	tempInCelsius = input.getNumber(10)
-	fuelRatio = input.getNumber(11)
+	local a = property.getNumber("rps channel")
+	RPM = math.floor(input.getNumber(a) * 60)
+	local b = property.getNumber("temperature channel")
+	tempInCelsius = math.floor(input.getNumber(b))
 end
-
-
--- Draw function that will be executed when this script renders to a screen
 function onDraw()
-	
 	colorBackground = XTColor(10,10,10)
 	colorBackgroundDark = XTColor(8,8,8)
-	colorPrimary = XTColor(150, 150, 255)
-	colorSecondary = XTColor(50, 50, 80)
-	colorHighlight = XTColor(255, 0, 0)
-	
-	screenScale = math.min(screen.getWidth(), screen.getHeight())
-
+	colorPrimary = XTColor(150,150,255)
+	colorSecondary = XTColor(50,50,80)
+	colorHighlight = XTColor(255,0,0)
+	screenScale = math.min(screen.getWidth(),screen.getHeight())
 	drawRightSide()
 end
-
 function drawRightSide()
-	local origin = XTPoint(screen.getWidth()/3*2, 0)
+	local c = XTPoint(screen.getWidth() / 3 * 2,0)
+	local d = c:addX(2):addY(screenScale - 8)
 	
-	local row4 = origin:addX(2):addY(screenScale - 8)
-	XTRectangle(row4, screenScale - 4, screenScale/4 - 2):drawFilled(colorBackgroundDark):drawOutline(colorPrimary)
-	XTRectangle(row4:addY(1), screenScale - 4, screenScale/4 - 2):drawTextBox("100" .. "C", colorPrimary)
+	local boxWidth = screenScale - 5
+	local boxHeight = screenScale / 4 - 2
 	
-	local row3 = row4:addY(-7)
-	XTRectangle(row3:addY(1), screenScale - 3, screenScale/4 - 2):drawTextBox("Tmp", colorPrimary)
-	
-	local row2 = row3:addY(-7)
-	XTRectangle(row2, screenScale - 3, screenScale/4 - 2):drawFilled(colorBackgroundDark):drawOutline(colorPrimary)
-	XTRectangle(row2:addY(1), screenScale - 3, screenScale/4 - 2):drawTextBox("1000", colorPrimary)
-	
-	local row1 = row2:addY(-7)
-	XTRectangle(row1:addY(1), screenScale - 3, screenScale/4 - 2):drawTextBox("RPM", colorPrimary)
-
+	XTRectangle(d,boxWidth, boxHeight):drawFilled(colorBackgroundDark):drawOutline(colorPrimary)
+	XTRectangle(d:addY(1),boxWidth, boxHeight):drawTextBox(tempInCelsius .. "C",colorPrimary)
+	local e = d:addY(- 7)
+	XTRectangle(e:addY(1),boxWidth, boxHeight):drawTextBox("Tmp",colorPrimary)
+	local f = e:addY(- 7)
+	XTRectangle(f,boxWidth, boxHeight):drawFilled(colorBackgroundDark):drawOutline(colorPrimary)
+	XTRectangle(f:addY(1),boxWidth, boxHeight):drawTextBox(RPM,colorPrimary)
+	local g = f:addY(- 7)
+	XTRectangle(g:addY(1),boxWidth, boxHeight):drawTextBox("RPM",colorPrimary)
 end
-
------------------------ Library ---------------------------------------------------------------
-
-function XTMap(value, min1, max1, min2, max2)
-    return min2 + (value - min1) * (max2 - min2) / (max1 - min1)
+function XTMap(h,i,j,k,l)
+	return k + (h - i) * (l - k) / (j - i)
 end
-
-function XTClamp(value, min, max)
-    return math.max(min, math.min(value, max))
+function XTClamp(h,m,n)
+	return math.max(m,math.min(h,n))
 end
-
-function XTPoint(x,y)
-    local point = {}
-    point.x = x or 0
-    point.y = y or 0
-    
-    function point:rotate(pivot, angle)
-    	local radians = angle * math.pi / 180
-		local s = math.sin(radians);
-		local c = math.cos(radians);
-		rX = ((self.x - pivot.x) * c - (self.y - pivot.y) * s) + pivot.x;
-		rY = ((self.x - pivot.x) * s + (self.y - pivot.y) * c) + pivot.y;
-		return XTPoint(rX, rY)
-    end
-
-	function point:addX(deltaX)
-		return XTPoint(self.x + deltaX, self.y)
+function XTPoint(o,p)
+	local q = {}
+	q.x = o or 0
+	q.y = p or 0
+	function q:rotate(r,s)
+		local t = s * math.pi / 180
+		local u = math.sin(t)
+		local v = math.cos(t)
+		rX = (self.x - r.x) * v - (self.y - r.y) * u + r.x
+		rY = (self.x - r.x) * u + (self.y - r.y) * v + r.y
+		return XTPoint(rX,rY)
 	end
-	
-	function point:addY(deltaY)
-		return XTPoint(self.x, self.y + deltaY)
+	function q:addX(w)
+		return XTPoint(self.x + w,self.y)
 	end
-	
-	function point:draw(color)
-		XTSetScreenColor(color)
+	function q:addY(x)
+		return XTPoint(self.x,self.y + x)
+	end
+	function q:draw(y)
+		XTSetScreenColor(y)
 		screen.drawRectF(self.x,self.y,1,1)
 		return self
 	end
-    
-    return point
+	return q
 end
-
-function XTLine(p1,p2)
-	local line = {}
-	line.p1 = p1
-	line.p2 = p2
-	
-	function line:draw(color)
-		XTSetScreenColor(color)
-		screen.drawLine(self.p1.x, self.p1.y, self.p2.x, self.p2.y)
+function XTLine(z,A)
+	local B = {}
+	B.p1 = z
+	B.p2 = A
+	function B:draw(y)
+		XTSetScreenColor(y)
+		screen.drawLine(self.p1.x,self.p1.y,self.p2.x,self.p2.y)
 		return self
 	end
-	
-	return line
+	return B
 end
-
-function XTRectangle(origin, width, height)
-	local rectangle = {}
-    rectangle.origin = origin or XTPoint(0,0)
-    rectangle.width = width or 0
-    rectangle.height = height or 0
-
-    function rectangle:drawOutline(color)
-		XTSetScreenColor(color)
-		screen.drawRect(self.origin.x, self.origin.y, self.width, self.height)
-		return self
-    end
-
-	function rectangle:drawFilled(color)
-		XTSetScreenColor(color)
-		screen.drawRectF(self.origin.x, self.origin.y, self.width, self.height)
+function XTRectangle(c,C,D)
+	local E = {}
+	E.origin = c or XTPoint(0,0)
+	E.width = C or 0
+	E.height = D or 0
+	function E:drawOutline(y)
+		XTSetScreenColor(y)
+		screen.drawRect(self.origin.x,self.origin.y,self.width,self.height)
 		return self
 	end
-	
-	function rectangle:drawGradient(colorStart, colorEnd)
-		for i = 0, width, 1 do
-		    currentColor = XTColor(
-		    	colorStart.r + i*(colorEnd.r-colorStart.r)/self.width,
-		    	colorStart.g + i*(colorEnd.g-colorStart.g)/self.width,
-		    	colorStart.b + i*(colorEnd.b-colorStart.b)/self.width,
-		    	colorStart.a + i*(colorEnd.a-colorStart.a)/self.width
-	    	)
-	    	XTSetScreenColor(currentColor)
-	    	screen.drawRectF(self.origin.x+i, self.origin.y, 1, self.height)
-		end	
+	function E:drawFilled(y)
+		XTSetScreenColor(y)
+		screen.drawRectF(self.origin.x,self.origin.y,self.width,self.height)
 		return self
 	end
-	
-	function rectangle:drawTextBox(text, color, alignment)
-		alignment = alignment or 0
-		XTSetScreenColor(color)
-		screen.drawTextBox(self.origin.x, self.origin.y, self.width, self.height, text, alignment)
+	function E:drawGradient(F,G)
+		for H=0, C, 1 do
+			currentColor = XTColor(F.r + H * (G.r - F.r) / self.width,F.g + H * (G.g - F.g) / self.width,F.b + H * (G.b - F.b) / self.width,F.a + H * (G.a - F.a) / self.width)
+			XTSetScreenColor(currentColor)
+			screen.drawRectF(self.origin.x + H,self.origin.y,1,self.height)
+		end
 		return self
 	end
-    
-    return rectangle
-end
-
-function XTColor(r, g, b, a)
-    local color = {}
-    color.r = r or 255
-    color.g = g or 255
-    color.b = b or 255
-    color.a = a or 255
-    
-    function color:withAlpha(newA)
-		return XTColor(self.r, self.g, self.b, newA)
+	function E:drawTextBox(I,y,J)
+		J = J or 0
+		XTSetScreenColor(y)
+		screen.drawTextBox(self.origin.x,self.origin.y,self.width,self.height,I,J)
+		return self
 	end
-    
-    return color
+	return E
 end
-
-function XTSetScreenColor(color)
-	screen.setColor(color.r, color.g, color.b, color.a)
+function XTColor(K,L,M,N)
+	local y = {}
+	y.r = K or 255
+	y.g = L or 255
+	y.b = M or 255
+	y.a = N or 255
+	function y:withAlpha(O)
+		return XTColor(self.r,self.g,self.b,O)
+	end
+	return y
 end
-
+function XTSetScreenColor(y)
+	screen.setColor(y.r,y.g,y.b,y.a)
+end
