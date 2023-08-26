@@ -95,6 +95,13 @@ function XTRectangle(origin, width, height)
 	    	screen.drawRectF(self.origin.x+i, self.origin.y, 1, self.height)
 		end	
 	end
+
+	function rectangle:drawTextBox(text,color,alingment)
+		alingment = alingment or 0
+		XTSetScreenColor(color)
+		screen.drawTextBox(self.origin.x,self.origin.y,self.width,self.height,text,alingment)
+		return self
+	end
     
     return rectangle
 end
